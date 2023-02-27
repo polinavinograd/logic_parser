@@ -36,7 +36,7 @@ int main() {
         if (choice1 == "back") {
           break;
         } else if (choice1 == "1") {
-          std::ofstream file_o("formulas.txt", std::ios::app);
+          std::ofstream file_o("../../formulas.txt", std::ios::app);
           std::string addingFormula;
           std::cout << "-----------------------------------\n";
           std::cout << "Enter formula:\n";
@@ -47,7 +47,7 @@ int main() {
           }
           file_o.close();
         } else if (choice1 == "2") {
-          std::ifstream file("formulas.txt");
+          std::ifstream file("../../formulas.txt");
           std::cout << "----------------------------------------------------------------\n";
           std::cout << "Whether the string is a reduced propositional logic "
                        "formula?\nWrite the answer in the following format:\n"
