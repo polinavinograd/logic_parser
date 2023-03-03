@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 class Formula {
     public:
@@ -35,31 +36,31 @@ class AtomicFormula: public Formula {
 
 class UnaryFormula: public Formula {
     public:
-        UnaryFormula(Formula* input) : formula(input){}
+        UnaryFormula(std::shared_ptr<Formula> input) : formula(input){}
         virtual std::string getSign() = 0;
         std::string toString() override { 
             return "(" + getSign() + formula->toString() + ")";
         }
     private:
-        Formula *formula;
+        std::shared_ptr<Formula> formula;
 };
 
 class BinaryFormula: public Formula {
     public:
-        BinaryFormula(Formula* lFormula, Formula* rFormula) : leftFormula(lFormula), rightFormula(rFormula) {}
+        BinaryFormula(std::shared_ptr<Formula> lFormula, std::shared_ptr<Formula> rFormula) : leftFormula(lFormula), rightFormula(rFormula) {}
         virtual std::string getSign() = 0;
         std::string toString() override { 
             return "(" + leftFormula->toString() + getSign() + rightFormula->toString() + ")";
         }
 
     private:
-        Formula *leftFormula;
-        Formula *rightFormula;
+        std::shared_ptr<Formula> leftFormula;
+        std::shared_ptr<Formula> rightFormula;
 };
 
 class Conjunction : public BinaryFormula {
     public:
-        Conjunction(Formula* leftFormula, Formula* rightFormula) : BinaryFormula(leftFormula, rightFormula) {}
+        Conjunction(std::shared_ptr<Formula> leftFormula, std::shared_ptr<Formula> rightFormula) : BinaryFormula(leftFormula, rightFormula) {}
         std::string getSign() override;
     private:
         std::string sign = "/\\";
@@ -67,7 +68,7 @@ class Conjunction : public BinaryFormula {
 
 class Disjunction : public BinaryFormula {
     public:
-        Disjunction(Formula* leftFormula, Formula* rightFormula) : BinaryFormula(leftFormula, rightFormula) {}
+        Disjunction(std::shared_ptr<Formula> leftFormula, std::shared_ptr<Formula> rightFormula) : BinaryFormula(leftFormula, rightFormula) {}
         std::string getSign() override;
     private:
         std::string sign = "\\/";
@@ -75,7 +76,7 @@ class Disjunction : public BinaryFormula {
 
 class Implication : public BinaryFormula {
     public:
-        Implication(Formula* leftFormula, Formula* rightFormula) : BinaryFormula(leftFormula, rightFormula) {}
+        Implication(std::shared_ptr<Formula> leftFormula, std::shared_ptr<Formula> rightFormula) : BinaryFormula(leftFormula, rightFormula) {}
         std::string getSign() override;
     private:
         std::string sign = "->";
@@ -83,7 +84,7 @@ class Implication : public BinaryFormula {
 
 class Equivalence : public BinaryFormula {
     public:
-        Equivalence(Formula* leftFormula, Formula* rightFormula) : BinaryFormula(leftFormula, rightFormula) {}
+        Equivalence(std::shared_ptr<Formula> leftFormula, std::shared_ptr<Formula> rightFormula) : BinaryFormula(leftFormula, rightFormula) {}
         std::string getSign() override;
     private:
         std::string sign = "~";
@@ -91,7 +92,7 @@ class Equivalence : public BinaryFormula {
 
 class Negation : public UnaryFormula {
     public:
-        Negation(Formula* input) : UnaryFormula(input) {}
+        Negation(std::shared_ptr<Formula> input) : UnaryFormula(input) {}
         std::string getSign() override;
     private:
         std::string sign = "!";
@@ -99,10 +100,10 @@ class Negation : public UnaryFormula {
 
 class Parser {
     public:
-        Formula *parseFormula(std::string inputString);
+        std::shared_ptr<Formula> parseFormula(std::string inputString);
     private:
-        BinaryFormula *parseBinaryFormula(std::string inputString);
-        UnaryFormula *parseUnaryFormula(std::string inputString);
-        AtomicFormula *parseAtomicFormula(std::string inputString);
-        LogicConstant *parseLogicConstant(std::string inputString);
+        std::shared_ptr<BinaryFormula> parseBinaryFormula(std::string inputString);
+        std::shared_ptr<UnaryFormula> parseUnaryFormula(std::string inputString);
+        std::shared_ptr<AtomicFormula> parseAtomicFormula(std::string inputString);
+        std::shared_ptr<LogicConstant> parseLogicConstant(std::string inputString);
 };

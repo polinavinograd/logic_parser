@@ -19,21 +19,21 @@ int main() {
     std::cout << "Choose the mode :" << std::endl
               << "1. Testing knowledge mode" << std::endl
               << "2. Checking statements mode" << std::endl
-              << "exit\n";
+              << "3. exit\n";
     std::string choice;
     std::cin >> choice;
     std::cin.ignore( std::numeric_limits<std::streamsize>::max(), '\n' );
-    if (choice == "exit") {
+    if (choice == "3") {
       return 0;
 
     } else if (choice == "1") {
       while (true) {
         std::cout << "-----------------------------------\n";
-        std::cout << "1. Add formula to testing database\n2. Test\nback\n";
+        std::cout << "1. Add formula to testing database\n2. Test\n3. back\n";
         std::string choice1;
         std::cin >> choice1;
         std::cin.ignore( std::numeric_limits<std::streamsize>::max(), '\n' );
-        if (choice1 == "back") {
+        if (choice1 == "3") {
           break;
         } else if (choice1 == "1") {
           std::ofstream file_o("../../formulas.txt", std::ios::app);
@@ -86,12 +86,12 @@ int main() {
     } else if (choice == "2") {
       while (true) {
         std::cout << "-----------------------------------\n";
-        std::cout << "back\nEnter the statement: \n";
+        std::cout << "2. back\nEnter the statement: \n";
         std::string str;
         std::getline(std::cin, str);
 
         // std::cin >> str;
-        if (str == "back") {
+        if (str == "2") {
           break;
         } else {
           if (str != "")

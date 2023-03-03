@@ -6,25 +6,26 @@
 // 26.02.2023
 
 #include "Formula.h"
+#include <memory>
 #include <string>
 
-Formula *Parser::parseFormula(std::string inputString) {
-    if (auto *formula = parseAtomicFormula(inputString)) {
+std::shared_ptr<Formula> Parser::parseFormula(std::string inputString) {
+    if (auto formula = parseAtomicFormula(inputString)) {
         return formula;
     }
-    if (auto *formula = parseLogicConstant(inputString)) {
+    if (auto formula = parseLogicConstant(inputString)) {
         return formula;
     }
-    if (auto *formula = parseUnaryFormula(inputString)) {
+    if (auto formula = parseUnaryFormula(inputString)) {
         return formula;
     }
-    if (auto *formula = parseBinaryFormula(inputString)) {
+    if (auto formula = parseBinaryFormula(inputString)) {
         return formula;
     }
     return nullptr;
 }
 
-BinaryFormula *Parser::parseBinaryFormula(std::string inputString) {
+std::shared_ptr<BinaryFormula> Parser::parseBinaryFormula(std::string inputString) {
     if (inputString.size() > 4 && inputString[0] == '(' && inputString[inputString.size() - 1] == ')' ) {
         int position = 2;
         int brackets = 0;
@@ -43,8 +44,8 @@ BinaryFormula *Parser::parseBinaryFormula(std::string inputString) {
         if (brackets != 0) {
             return nullptr;
         }
-        Formula *left = nullptr;
-        Formula *right = nullptr;
+        std::shared_ptr<Formula> left = nullptr;
+        std::shared_ptr<Formula> right = nullptr;
         if(position > inputString.size() - 3) {
             return nullptr;
         }
@@ -62,13 +63,13 @@ BinaryFormula *Parser::parseBinaryFormula(std::string inputString) {
         }
         switch (inputString[position]) {
             case '/':
-                return new Conjunction(left, right);
+                return std::make_shared<Conjunction>(left, right);
             case '\\':
-                return new Disjunction(left, right);
+                return std::make_shared<Disjunction>(left, right);
             case '-':
-                return new Implication(left, right);
+                return std::make_shared<Implication>(left, right);
             case '~':
-                return new Equivalence(left, right);
+                return std::make_shared<Equivalence>(left, right);
             default:
                 return nullptr;       
         }
@@ -76,7 +77,7 @@ BinaryFormula *Parser::parseBinaryFormula(std::string inputString) {
     return nullptr;
 }
 
-UnaryFormula *Parser::parseUnaryFormula(std::string inputString) {
+std::shared_ptr<UnaryFormula> Parser::parseUnaryFormula(std::string inputString) {
     if (inputString.size() > 3 && inputString[0] == '(' && inputString[inputString.size() - 1] == ')' && inputString [1] == '!') {
         int position = 2;
         int brackets = 0;
@@ -95,24 +96,24 @@ UnaryFormula *Parser::parseUnaryFormula(std::string inputString) {
         if (brackets != 0) {
             return nullptr;
         }
-        Formula* subFormula = parseFormula(inputString.substr(2, inputString.size() - 3));
+        std::shared_ptr<Formula> subFormula = parseFormula(inputString.substr(2, inputString.size() - 3));
         if (subFormula) {
-            return new Negation(subFormula); 
+            return std::make_shared<Negation>(subFormula); 
         }
     }
     return nullptr;
 }
 
-AtomicFormula *Parser::parseAtomicFormula(std::string inputString) {
+std::shared_ptr<AtomicFormula> Parser::parseAtomicFormula(std::string inputString) {
     if (inputString.size() == 1 && inputString <= "Z" && inputString >= "A") {
-        return new AtomicFormula(inputString[0]);
+        return std::make_shared<AtomicFormula>(inputString[0]);
     }  
     return nullptr;
 }
 
-LogicConstant *Parser::parseLogicConstant(std::string inputString) {
+std::shared_ptr<LogicConstant> Parser::parseLogicConstant(std::string inputString) {
     if (inputString.size() == 1 && inputString == "1" || inputString == "0") {
-        return new LogicConstant(inputString == "1");
+        return std::make_shared<LogicConstant>(inputString == "1");
     }
     return nullptr;
 }
