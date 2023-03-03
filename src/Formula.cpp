@@ -78,21 +78,40 @@ BinaryFormula *Parser::parseBinaryFormula(std::string inputString) {
 
 UnaryFormula *Parser::parseUnaryFormula(std::string inputString) {
     if (inputString.size() > 3 && inputString[0] == '(' && inputString[inputString.size() - 1] == ')' && inputString [1] == '!') {
+        int position = 2;
+        int brackets = 0;
+        if (inputString[0] == '(') {
+            brackets++;
+        }
+        while (position < inputString.size()  && brackets != 0) {
+            if (inputString[position] == '(') {
+                brackets++;
+            }
+            if (inputString[position] == ')') {
+                brackets--;
+            }
+            position++;
+        }
+        if (brackets != 0) {
+            return nullptr;
+        }
         Formula* subFormula = parseFormula(inputString.substr(2, inputString.size() - 3));
-        return new Negation(subFormula); 
+        if (subFormula) {
+            return new Negation(subFormula); 
+        }
     }
     return nullptr;
 }
 
 AtomicFormula *Parser::parseAtomicFormula(std::string inputString) {
-    if (inputString <= "Z" && inputString >= "A") {
+    if (inputString.size() == 1 && inputString <= "Z" && inputString >= "A") {
         return new AtomicFormula(inputString[0]);
     }  
     return nullptr;
 }
 
 LogicConstant *Parser::parseLogicConstant(std::string inputString) {
-    if (inputString == "1" || inputString == "0") {
+    if (inputString.size() == 1 && inputString == "1" || inputString == "0") {
         return new LogicConstant(inputString == "1");
     }
     return nullptr;
