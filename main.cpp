@@ -8,7 +8,6 @@
 #include "src/Formula.h"
 #include <fstream>
 #include <iostream>
-#include <vector>
 #include <string>
 #include <limits>
 
@@ -79,18 +78,39 @@ void checking_statements_mode() {
     if (str == "2") {
       break;
     } else {
-      if (str != "")
-      {
-        Parser parser;
-        auto formula = parser.parseFormula(str);
-        if (formula) {
-          std::cout << formula->toString() << " is a formula" << std::endl;
-        } else {
-          std::cout << "NO\n";
-        }
+      Parser parser;
+      auto formula = parser.parseFormula(str);
+      if (formula) {
+        std::cout << formula->toString() << " is a formula" << std::endl;
+      } else {
+        std::cout << "Not a formula\n";
       }
-      else{
-        std::cout << "NO\n";
+    }
+  }
+}
+
+void calculating_mode() {
+  while (true) {
+    std::cout << "-----------------------------------\n";
+    std::cout << "3. back\nEnter the formula: \n";
+    std::string str;
+    std::getline(std::cin, str);
+    if (str == "3") {
+      break;
+    } else {
+      TruthTable table;
+      Parser parser;
+      std::string resultPDNF;
+      if (auto formula = parser.parseFormula(str)) {
+        std::vector<bool> res = table.calculate(formula);
+        if (res.size() == 0) {
+          std::cout << "Not a formula\n";
+        } else {
+        for (int i = 0; i < res.size(); i++) {
+          std::cout << res[i] << " ";
+        }
+        std::cout << std::endl;
+        }
       }
     }
   }
@@ -104,16 +124,19 @@ int main() {
     std::cout << "Choose the mode :" << std::endl
               << "1. Testing knowledge mode" << std::endl
               << "2. Checking statements mode" << std::endl
-              << "3. exit\n";
+              << "3. calculate" << std::endl
+              << "4. exit\n";
     std::string choice;
     std::cin >> choice;
     std::cin.ignore( std::numeric_limits<std::streamsize>::max(), '\n' );
-    if (choice == "3") {
+    if (choice == "4") {
       return 0;
     } else if (choice == "1") {
       testing_mode();
     } else if (choice == "2") {
       checking_statements_mode();
+    } else if (choice == "3") {
+      calculating_mode();
     } else {
       std::cout << "Unexpected answer!\n";
     }

@@ -7,7 +7,19 @@
 
 #include "Formula.h"
 #include <memory>
+#include <set>
+#include <math.h>
 #include <string>
+
+
+std::vector<bool> decimalToBinary(int decimal, const std::set<char> &variables) {
+    std::vector<bool> binary_num;
+    for (int i = 0; i < variables.size(); i++) {
+        binary_num.insert(binary_num.begin(), decimal % 2);
+        decimal /= 2;
+    }
+    return binary_num;
+}
 
 std::shared_ptr<Formula> Parser::parseFormula(std::string inputString) {
     if (auto formula = parseAtomicFormula(inputString)) {
@@ -137,3 +149,78 @@ std::string Implication::getSign() {
 std::string Negation::getSign() {
     return sign;
 }
+
+std::shared_ptr<Formula> UnaryFormula::getFormula() {
+    return formula;
+}
+
+std::shared_ptr<Formula> BinaryFormula::getLeft() {
+    return leftFormula;
+}
+
+std::shared_ptr<Formula> BinaryFormula::getRight() {
+    return rightFormula;
+}
+
+bool Negation::calculate(const std::map<char, bool>& correlation) {
+    return !(getFormula()->calculate(correlation));
+}
+
+bool Conjunction::calculate(const std::map<char, bool>& correlation) {
+    return (getLeft()->calculate(correlation) && getRight()->calculate(correlation));
+}
+
+bool Disjunction::calculate(const std::map<char, bool>& correlation) {
+    return (getLeft()->calculate(correlation) || getRight()->calculate(correlation));
+}
+
+bool Equivalence::calculate(const std::map<char, bool>& correlation) {
+    return (getLeft()->calculate(correlation) == getRight()->calculate(correlation));
+}
+
+bool Implication::calculate(const std::map<char, bool>& correlation) {
+    return (!(getLeft()->calculate(correlation)) || (getRight()->calculate(correlation)));
+}
+
+bool LogicConstant::calculate(const std::map<char, bool>& correlation) {
+    return constant;
+};
+
+bool AtomicFormula::calculate(const std::map<char, bool>& correlation) {
+    value = correlation.at(letter);
+    return value;
+}
+
+std::vector<bool> TruthTable::calculate(std::shared_ptr<Formula> formula) {
+    std::vector<bool> result;
+    std::string str = formula->toString();
+    std::set<char> variables;
+    std::map<char, bool> correlation;
+    for (int i = 0; i < str.size(); i++) {
+        if (isalpha(str[i])) {
+            variables.emplace(str[i]);
+        }
+    }
+    for (int j = 0; j < pow(2,variables.size()); j++) {
+        std::vector<bool> binary_num = decimalToBinary(j, variables);
+        std::set<char>::iterator it = variables.begin();
+        for (int i = 0; i < binary_num.size() && it != variables.end(); i++) {
+            correlation[*it] = (binary_num[i]);
+            it++;
+        }
+        result.emplace_back(formula->calculate(correlation));
+    }
+    return result;
+}
+
+std::string TruthTable::buildPDNF(const std::string &inputString) {
+    Parser parser;
+    std::string resultPDNF;
+    if (auto formula = parser.parseFormula(inputString)) {
+        std::vector<bool> table = calculate(formula);
+
+        // построение СДНФ
+    }
+    return resultPDNF;
+}
+
