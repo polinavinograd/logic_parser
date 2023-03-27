@@ -1,9 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////////////
-// Лабораторная работа 1 по дисциплине ЛОИС
+// Лабораторная работа 2 по дисциплине ЛОИС
 // Выполнена студентом группы 021702
 // БГУИР Виноградовой П.С.
-// Вариант 2 - Проверить, является ли строка формулой сокращенного языка логики
-// высказываний 26.02.2023
+// Вариант 9 - Построить СДНФ для заданной формулы сокращенного языка логики высказываний.
+// 27.03.2023
 
 #include "src/Formula.h"
 #include <fstream>
@@ -92,15 +92,14 @@ void checking_statements_mode() {
 void calculating_mode() {
   while (true) {
     std::cout << "-----------------------------------\n";
-    std::cout << "3. back\nEnter the formula: \n";
+    std::cout << "2. back\nEnter the formula: \n";
     std::string str;
     std::getline(std::cin, str);
-    if (str == "3") {
+    if (str == "2") {
       break;
     } else {
       TruthTable table;
       Parser parser;
-      std::string resultPDNF;
       if (auto formula = parser.parseFormula(str)) {
         std::vector<bool> res = table.calculate(formula);
         if (res.size() == 0) {
@@ -117,6 +116,27 @@ void calculating_mode() {
 }
 
 
+void building_mode() {
+  while (true) {
+    std::cout << "-----------------------------------\n";
+    std::cout << "2. back\nEnter the formula: \n";
+    std::string str;
+    std::getline(std::cin, str);
+    if (str == "2") {
+      break;
+    } else {
+      TruthTable table;
+      std::string result = table.buildPDNF(str);
+      if (result != "") {
+        std::cout<< result << std::endl;
+      } else {
+        std::cout << "Can't build a PDNF\n";
+      }
+    }
+  }
+}
+
+
 int main() {
   
   while (true) {
@@ -125,11 +145,12 @@ int main() {
               << "1. Testing knowledge mode" << std::endl
               << "2. Checking statements mode" << std::endl
               << "3. calculate" << std::endl
-              << "4. exit\n";
+              << "4. Build PDNF" << std::endl
+              << "5. exit\n";
     std::string choice;
     std::cin >> choice;
     std::cin.ignore( std::numeric_limits<std::streamsize>::max(), '\n' );
-    if (choice == "4") {
+    if (choice == "5") {
       return 0;
     } else if (choice == "1") {
       testing_mode();
@@ -137,6 +158,8 @@ int main() {
       checking_statements_mode();
     } else if (choice == "3") {
       calculating_mode();
+    } else if (choice == "4") {
+      building_mode();
     } else {
       std::cout << "Unexpected answer!\n";
     }

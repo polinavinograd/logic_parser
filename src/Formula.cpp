@@ -1,15 +1,16 @@
 //////////////////////////////////////////////////////////////////////////////////////
-// Лабораторная работа 1 по дисциплине ЛОИС
+// Лабораторная работа 2 по дисциплине ЛОИС
 // Выполнена студентом группы 021702
 // БГУИР Виноградовой П.С.
-// Вариант 2 - Проверить, является ли строка формулой сокращенного языка логики высказываний
-// 26.02.2023
+// Вариант 9 - Построить СДНФ для заданной формулы сокращенного языка логики высказываний.
+// 27.03.2023
 
 #include "Formula.h"
 #include <memory>
 #include <set>
 #include <math.h>
 #include <string>
+#include <algorithm>
 
 
 std::vector<bool> decimalToBinary(int decimal, const std::set<char> &variables) {
@@ -191,7 +192,12 @@ bool AtomicFormula::calculate(const std::map<char, bool>& correlation) {
     return value;
 }
 
+bool LogicConstant::getConstant() {
+    return constant;
+}
+
 std::vector<bool> TruthTable::calculate(std::shared_ptr<Formula> formula) {
+
     std::vector<bool> result;
     std::string str = formula->toString();
     std::set<char> variables;
@@ -201,26 +207,77 @@ std::vector<bool> TruthTable::calculate(std::shared_ptr<Formula> formula) {
             variables.emplace(str[i]);
         }
     }
-    for (int j = 0; j < pow(2,variables.size()); j++) {
-        std::vector<bool> binary_num = decimalToBinary(j, variables);
-        std::set<char>::iterator it = variables.begin();
-        for (int i = 0; i < binary_num.size() && it != variables.end(); i++) {
-            correlation[*it] = (binary_num[i]);
-            it++;
+    if (variables.size() != 0) {
+        for (int j = 0; j < pow(2,variables.size()); j++) {
+            std::vector<bool> binary_num = decimalToBinary(j, variables);
+            std::set<char>::iterator it = variables.begin();
+            for (int i = 0; i < binary_num.size() && it != variables.end(); i++) {
+                correlation[*it] = (binary_num[i]);
+                it++;
+            }
+            result.emplace_back(formula->calculate(correlation));
         }
-        result.emplace_back(formula->calculate(correlation));
     }
     return result;
 }
 
 std::string TruthTable::buildPDNF(const std::string &inputString) {
     Parser parser;
-    std::string resultPDNF;
+    std::string result_block = "";
+    std::set<char> variables;
+    for (int i = 0; i < inputString.size(); i++) {
+        if (isalpha(inputString[i])) {
+            variables.emplace(inputString[i]);
+        }
+    }
+
     if (auto formula = parser.parseFormula(inputString)) {
         std::vector<bool> table = calculate(formula);
+        std::vector<std::string> result;
+        std::vector<int> decimal;
+        
+        for (int i = 0; i < table.size(); i++) {
+            if (table[i]) {
+                decimal.emplace_back(i);
+            }
+        }
+        if (decimal.size() == 0) {
+            return "";
+        }
+        for (int i = 0; i < decimal.size() - 1; i++) {
+            result_block += "(";
+        }
+        for (int i = 0; i < decimal.size(); i++) {
+            std::vector<bool> binary_num = decimalToBinary(decimal[i], variables);
+            std::set<char>::iterator it = variables.begin();
+            std::string conjuncted_block = "";
+            for (int j = 0; j < variables.size() - 1; j++) {
+                conjuncted_block += "(";
+            }
+            for (int j = 0; j < binary_num.size() && it != variables.end(); j++) {
+                if (binary_num[j]) {
+                    conjuncted_block += *it;
+                } else {
+                    conjuncted_block = conjuncted_block + "(!" + *it + ")";
+                }
+                if (j != 0) {
+                    conjuncted_block += ")";
+                }
+                it++;
+                conjuncted_block += j == binary_num.size() - 1 ? "" : "/\\";
+    
+            }
 
-        // построение СДНФ
+            result.push_back(conjuncted_block);
+            conjuncted_block = "";
+        }
+        for (int j = 0; j < result.size(); j++) {
+                result_block += result[j];
+                if (j != 0) {
+                    result_block += ")";
+                }
+                result_block += j == result.size() - 1 ? "" : "\\/";
+            }
     }
-    return resultPDNF;
+    return result_block;
 }
-

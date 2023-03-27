@@ -46,4 +46,5 @@
 *.tlog
 *.recipe
 build
+test.txt
 
