@@ -142,24 +142,18 @@ int main() {
   while (true) {
     std::cout << "----------------------------\n";
     std::cout << "Choose the mode :" << std::endl
-              << "1. Testing knowledge mode" << std::endl
-              << "2. Checking statements mode" << std::endl
-              << "3. calculate" << std::endl
-              << "4. Build PDNF" << std::endl
-              << "5. exit\n";
+              << "1. Build PDNF" << std::endl
+              << "2. Calculate formula" << std::endl
+              << "3. exit\n";
     std::string choice;
     std::cin >> choice;
     std::cin.ignore( std::numeric_limits<std::streamsize>::max(), '\n' );
-    if (choice == "5") {
+    if (choice == "3") {
       return 0;
     } else if (choice == "1") {
-      testing_mode();
-    } else if (choice == "2") {
-      checking_statements_mode();
-    } else if (choice == "3") {
-      calculating_mode();
-    } else if (choice == "4") {
       building_mode();
+    } else if (choice == "2") {
+      calculating_mode();
     } else {
       std::cout << "Unexpected answer!\n";
     }

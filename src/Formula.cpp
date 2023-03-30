@@ -2,282 +2,276 @@
 // Лабораторная работа 2 по дисциплине ЛОИС
 // Выполнена студентом группы 021702
 // БГУИР Виноградовой П.С.
-// Вариант 9 - Построить СДНФ для заданной формулы сокращенного языка логики высказываний.
-// 27.03.2023
+// Вариант 9 - Построить СДНФ для заданной формулы сокращенного языка логики
+// высказываний. 27.03.2023
 
 #include "Formula.h"
+#include <algorithm>
+#include <math.h>
 #include <memory>
 #include <set>
-#include <math.h>
 #include <string>
-#include <algorithm>
 
-
-std::vector<bool> decimalToBinary(int decimal, const std::set<char> &variables) {
-    std::vector<bool> binary_num;
-    for (int i = 0; i < variables.size(); i++) {
-        binary_num.insert(binary_num.begin(), decimal % 2);
-        decimal /= 2;
-    }
-    return binary_num;
+std::vector<bool> decimalToBinary(int decimal,
+                                  const std::set<char> &variables) {
+  std::vector<bool> binary_num;
+  for (int i = 0; i < variables.size(); i++) {
+    binary_num.insert(binary_num.begin(), decimal % 2);
+    decimal /= 2;
+  }
+  return binary_num;
 }
 
 std::shared_ptr<Formula> Parser::parseFormula(std::string inputString) {
-    if (auto formula = parseAtomicFormula(inputString)) {
-        return formula;
-    }
-    if (auto formula = parseLogicConstant(inputString)) {
-        return formula;
-    }
-    if (auto formula = parseUnaryFormula(inputString)) {
-        return formula;
-    }
-    if (auto formula = parseBinaryFormula(inputString)) {
-        return formula;
-    }
-    return nullptr;
-}
-
-std::shared_ptr<BinaryFormula> Parser::parseBinaryFormula(std::string inputString) {
-    if (inputString.size() > 4 && inputString[0] == '(' && inputString[inputString.size() - 1] == ')' ) {
-        int position = 2;
-        int brackets = 0;
-        if (inputString[1] == '(') {
-            brackets++;
-        }
-        while (position < inputString.size() - 1 && brackets != 0) {
-            if (inputString[position] == '(') {
-                brackets++;
-            }
-            if (inputString[position] == ')') {
-                brackets--;
-            }
-            position++;
-        }
-        if (brackets != 0) {
-            return nullptr;
-        }
-        std::shared_ptr<Formula> left = nullptr;
-        std::shared_ptr<Formula> right = nullptr;
-        if(position > inputString.size() - 3) {
-            return nullptr;
-        }
-        std::string twoCharSign = inputString.substr(position, 2);
-        if (twoCharSign == "/\\" || twoCharSign == "\\/" || twoCharSign == "->") {
-            left = parseFormula(inputString.substr(1, position -1));
-            right = parseFormula(inputString.substr(position + 2, inputString.size() - position - 3));
-        }
-        if (inputString[position] == '~') {
-            left = parseFormula(inputString.substr(1, position -1));
-             right = parseFormula(inputString.substr(position + 1, inputString.size() - position - 2));
-        }
-        if (!left || !right) {
-            return nullptr;
-        }
-        switch (inputString[position]) {
-            case '/':
-                return std::make_shared<Conjunction>(left, right);
-            case '\\':
-                return std::make_shared<Disjunction>(left, right);
-            case '-':
-                return std::make_shared<Implication>(left, right);
-            case '~':
-                return std::make_shared<Equivalence>(left, right);
-            default:
-                return nullptr;       
-        }
-    }
-    return nullptr;
-}
-
-std::shared_ptr<UnaryFormula> Parser::parseUnaryFormula(std::string inputString) {
-    if (inputString.size() > 3 && inputString[0] == '(' && inputString[inputString.size() - 1] == ')' && inputString [1] == '!') {
-        int position = 2;
-        int brackets = 0;
-        if (inputString[0] == '(') {
-            brackets++;
-        }
-        while (position < inputString.size()  && brackets != 0) {
-            if (inputString[position] == '(') {
-                brackets++;
-            }
-            if (inputString[position] == ')') {
-                brackets--;
-            }
-            position++;
-        }
-        if (brackets != 0) {
-            return nullptr;
-        }
-        std::shared_ptr<Formula> subFormula = parseFormula(inputString.substr(2, inputString.size() - 3));
-        if (subFormula) {
-            return std::make_shared<Negation>(subFormula); 
-        }
-    }
-    return nullptr;
-}
-
-std::shared_ptr<AtomicFormula> Parser::parseAtomicFormula(std::string inputString) {
-    if (inputString.size() == 1 && inputString <= "Z" && inputString >= "A") {
-        return std::make_shared<AtomicFormula>(inputString[0]);
-    }  
-    return nullptr;
-}
-
-std::shared_ptr<LogicConstant> Parser::parseLogicConstant(std::string inputString) {
-    if (inputString.size() == 1 && inputString == "1" || inputString == "0") {
-        return std::make_shared<LogicConstant>(inputString == "1");
-    }
-    return nullptr;
-}
-
-std::string Conjunction::getSign() {
-    return sign;
-}
-
-std::string Disjunction::getSign() {
-    return sign;
-}
-
-std::string Equivalence::getSign() {
-    return sign;
-}
-
-std::string Implication::getSign() {
-    return sign;
-}
-
-std::string Negation::getSign() {
-    return sign;
-}
-
-std::shared_ptr<Formula> UnaryFormula::getFormula() {
+  if (auto formula = parseAtomicFormula(inputString)) {
     return formula;
+  }
+  if (auto formula = parseLogicConstant(inputString)) {
+    return formula;
+  }
+  if (auto formula = parseUnaryFormula(inputString)) {
+    return formula;
+  }
+  if (auto formula = parseBinaryFormula(inputString)) {
+    return formula;
+  }
+  return nullptr;
 }
 
-std::shared_ptr<Formula> BinaryFormula::getLeft() {
-    return leftFormula;
+std::shared_ptr<BinaryFormula>
+Parser::parseBinaryFormula(std::string inputString) {
+  if (inputString.size() > 4 && inputString[0] == '(' &&
+      inputString[inputString.size() - 1] == ')') {
+    int position = 2;
+    int brackets = 0;
+    if (inputString[1] == '(') {
+      brackets++;
+    }
+    while (position < inputString.size() - 1 && brackets != 0) {
+      if (inputString[position] == '(') {
+        brackets++;
+      }
+      if (inputString[position] == ')') {
+        brackets--;
+      }
+      position++;
+    }
+    if (brackets != 0) {
+      return nullptr;
+    }
+    std::shared_ptr<Formula> left = nullptr;
+    std::shared_ptr<Formula> right = nullptr;
+    if (position > inputString.size() - 3) {
+      return nullptr;
+    }
+    std::string twoCharSign = inputString.substr(position, 2);
+    if (twoCharSign == "/\\" || twoCharSign == "\\/" || twoCharSign == "->") {
+      left = parseFormula(inputString.substr(1, position - 1));
+      right = parseFormula(
+          inputString.substr(position + 2, inputString.size() - position - 3));
+    }
+    if (inputString[position] == '~') {
+      left = parseFormula(inputString.substr(1, position - 1));
+      right = parseFormula(
+          inputString.substr(position + 1, inputString.size() - position - 2));
+    }
+    if (!left || !right) {
+      return nullptr;
+    }
+    switch (inputString[position]) {
+    case '/':
+      return std::make_shared<Conjunction>(left, right);
+    case '\\':
+      return std::make_shared<Disjunction>(left, right);
+    case '-':
+      return std::make_shared<Implication>(left, right);
+    case '~':
+      return std::make_shared<Equivalence>(left, right);
+    default:
+      return nullptr;
+    }
+  }
+  return nullptr;
 }
 
-std::shared_ptr<Formula> BinaryFormula::getRight() {
-    return rightFormula;
+std::shared_ptr<UnaryFormula>
+Parser::parseUnaryFormula(std::string inputString) {
+  if (inputString.size() > 3 && inputString[0] == '(' &&
+      inputString[inputString.size() - 1] == ')' && inputString[1] == '!') {
+    int position = 2;
+    int brackets = 0;
+    if (inputString[0] == '(') {
+      brackets++;
+    }
+    while (position < inputString.size() && brackets != 0) {
+      if (inputString[position] == '(') {
+        brackets++;
+      }
+      if (inputString[position] == ')') {
+        brackets--;
+      }
+      position++;
+    }
+    if (brackets != 0) {
+      return nullptr;
+    }
+    std::shared_ptr<Formula> subFormula =
+        parseFormula(inputString.substr(2, inputString.size() - 3));
+    if (subFormula) {
+      return std::make_shared<Negation>(subFormula);
+    }
+  }
+  return nullptr;
 }
 
-bool Negation::calculate(const std::map<char, bool>& correlation) {
-    return !(getFormula()->calculate(correlation));
+std::shared_ptr<AtomicFormula>
+Parser::parseAtomicFormula(std::string inputString) {
+  if (inputString.size() == 1 && inputString <= "Z" && inputString >= "A") {
+    return std::make_shared<AtomicFormula>(inputString[0]);
+  }
+  return nullptr;
 }
 
-bool Conjunction::calculate(const std::map<char, bool>& correlation) {
-    return (getLeft()->calculate(correlation) && getRight()->calculate(correlation));
+std::shared_ptr<LogicConstant>
+Parser::parseLogicConstant(std::string inputString) {
+  if (inputString.size() == 1 && inputString == "1" || inputString == "0") {
+    return std::make_shared<LogicConstant>(inputString == "1");
+  }
+  return nullptr;
 }
 
-bool Disjunction::calculate(const std::map<char, bool>& correlation) {
-    return (getLeft()->calculate(correlation) || getRight()->calculate(correlation));
+std::string Conjunction::getSign() { return sign; }
+
+std::string Disjunction::getSign() { return sign; }
+
+std::string Equivalence::getSign() { return sign; }
+
+std::string Implication::getSign() { return sign; }
+
+std::string Negation::getSign() { return sign; }
+
+std::shared_ptr<Formula> UnaryFormula::getFormula() { return formula; }
+
+std::shared_ptr<Formula> BinaryFormula::getLeft() { return leftFormula; }
+
+std::shared_ptr<Formula> BinaryFormula::getRight() { return rightFormula; }
+
+bool Negation::calculate(const std::map<char, bool> &correlation) {
+  return !(getFormula()->calculate(correlation));
 }
 
-bool Equivalence::calculate(const std::map<char, bool>& correlation) {
-    return (getLeft()->calculate(correlation) == getRight()->calculate(correlation));
+bool Conjunction::calculate(const std::map<char, bool> &correlation) {
+  return (getLeft()->calculate(correlation) &&
+          getRight()->calculate(correlation));
 }
 
-bool Implication::calculate(const std::map<char, bool>& correlation) {
-    return (!(getLeft()->calculate(correlation)) || (getRight()->calculate(correlation)));
+bool Disjunction::calculate(const std::map<char, bool> &correlation) {
+  return (getLeft()->calculate(correlation) ||
+          getRight()->calculate(correlation));
 }
 
-bool LogicConstant::calculate(const std::map<char, bool>& correlation) {
-    return constant;
+bool Equivalence::calculate(const std::map<char, bool> &correlation) {
+  return (getLeft()->calculate(correlation) ==
+          getRight()->calculate(correlation));
+}
+
+bool Implication::calculate(const std::map<char, bool> &correlation) {
+  return (!(getLeft()->calculate(correlation)) ||
+          (getRight()->calculate(correlation)));
+}
+
+bool LogicConstant::calculate(const std::map<char, bool> &correlation) {
+  return constant;
 };
 
-bool AtomicFormula::calculate(const std::map<char, bool>& correlation) {
-    value = correlation.at(letter);
-    return value;
+bool AtomicFormula::calculate(const std::map<char, bool> &correlation) {
+  value = correlation.at(letter);
+  return value;
 }
 
-bool LogicConstant::getConstant() {
-    return constant;
-}
+bool LogicConstant::getConstant() { return constant; }
 
 std::vector<bool> TruthTable::calculate(std::shared_ptr<Formula> formula) {
 
-    std::vector<bool> result;
-    std::string str = formula->toString();
-    std::set<char> variables;
-    std::map<char, bool> correlation;
-    for (int i = 0; i < str.size(); i++) {
-        if (isalpha(str[i])) {
-            variables.emplace(str[i]);
-        }
+  std::vector<bool> result;
+  std::string str = formula->toString();
+  std::set<char> variables;
+  std::map<char, bool> correlation;
+  for (int i = 0; i < str.size(); i++) {
+    if (isalpha(str[i])) {
+      variables.emplace(str[i]);
     }
-    if (variables.size() != 0) {
-        for (int j = 0; j < pow(2,variables.size()); j++) {
-            std::vector<bool> binary_num = decimalToBinary(j, variables);
-            std::set<char>::iterator it = variables.begin();
-            for (int i = 0; i < binary_num.size() && it != variables.end(); i++) {
-                correlation[*it] = (binary_num[i]);
-                it++;
-            }
-            result.emplace_back(formula->calculate(correlation));
-        }
+  }
+  if (variables.size() != 0) {
+    for (int j = 0; j < pow(2, variables.size()); j++) {
+      std::vector<bool> binary_num = decimalToBinary(j, variables);
+      std::set<char>::iterator it = variables.begin();
+      for (int i = 0; i < binary_num.size() && it != variables.end(); i++) {
+        correlation[*it] = (binary_num[i]);
+        it++;
+      }
+      result.emplace_back(formula->calculate(correlation));
     }
-    return result;
+  }
+  return result;
 }
 
 std::string TruthTable::buildPDNF(const std::string &inputString) {
-    Parser parser;
-    std::string result_block = "";
-    std::set<char> variables;
-    for (int i = 0; i < inputString.size(); i++) {
-        if (isalpha(inputString[i])) {
-            variables.emplace(inputString[i]);
-        }
+  Parser parser;
+  std::string result_block = "";
+  std::set<char> variables;
+  for (int i = 0; i < inputString.size(); i++) {
+    if (isalpha(inputString[i])) {
+      variables.emplace(inputString[i]);
     }
+  }
 
-    if (auto formula = parser.parseFormula(inputString)) {
-        std::vector<bool> table = calculate(formula);
-        std::vector<std::string> result;
-        std::vector<int> decimal;
-        
-        for (int i = 0; i < table.size(); i++) {
-            if (table[i]) {
-                decimal.emplace_back(i);
-            }
-        }
-        if (decimal.size() == 0) {
-            return "";
-        }
-        for (int i = 0; i < decimal.size() - 1; i++) {
-            result_block += "(";
-        }
-        for (int i = 0; i < decimal.size(); i++) {
-            std::vector<bool> binary_num = decimalToBinary(decimal[i], variables);
-            std::set<char>::iterator it = variables.begin();
-            std::string conjuncted_block = "";
-            for (int j = 0; j < variables.size() - 1; j++) {
-                conjuncted_block += "(";
-            }
-            for (int j = 0; j < binary_num.size() && it != variables.end(); j++) {
-                if (binary_num[j]) {
-                    conjuncted_block += *it;
-                } else {
-                    conjuncted_block = conjuncted_block + "(!" + *it + ")";
-                }
-                if (j != 0) {
-                    conjuncted_block += ")";
-                }
-                it++;
-                conjuncted_block += j == binary_num.size() - 1 ? "" : "/\\";
-    
-            }
+  if (auto formula = parser.parseFormula(inputString)) {
+    std::vector<bool> table = calculate(formula);
+    std::vector<std::string> result;
+    std::vector<int> decimal;
 
-            result.push_back(conjuncted_block);
-            conjuncted_block = "";
-        }
-        for (int j = 0; j < result.size(); j++) {
-                result_block += result[j];
-                if (j != 0) {
-                    result_block += ")";
-                }
-                result_block += j == result.size() - 1 ? "" : "\\/";
-            }
+    for (int i = 0; i < table.size(); i++) {
+      if (table[i]) {
+        decimal.emplace_back(i);
+      }
     }
-    return result_block;
+    if (decimal.size() == 0) {
+      return "";
+    }
+    for (int i = 0; i < decimal.size() - 1; i++) {
+      result_block += "(";
+    }
+    for (int i = 0; i < decimal.size(); i++) {
+      std::vector<bool> binary_num = decimalToBinary(decimal[i], variables);
+      std::set<char>::iterator it = variables.begin();
+      std::string conjuncted_block = "";
+      for (int j = 0; j < variables.size() - 1; j++) {
+        conjuncted_block += "(";
+      }
+      for (int j = 0; j < binary_num.size() && it != variables.end(); j++) {
+        if (binary_num[j]) {
+          conjuncted_block += *it;
+        } else {
+          conjuncted_block = conjuncted_block + "(!" + *it + ")";
+        }
+        if (j != 0) {
+          conjuncted_block += ")";
+        }
+        it++;
+        conjuncted_block += j == binary_num.size() - 1 ? "" : "/\\";
+      }
+
+      result.push_back(conjuncted_block);
+      conjuncted_block = "";
+    }
+    for (int j = 0; j < result.size(); j++) {
+      result_block += result[j];
+      if (j != 0) {
+        result_block += ")";
+      }
+      result_block += j == result.size() - 1 ? "" : "\\/";
+    }
+  }
+  return result_block;
 }
