@@ -155,6 +155,34 @@ void calculating_mode()
     }
 }
 
+void building_mode() {
+    while (true)
+    {
+        std::cout << "-----------------------------------\n";
+        std::cout << "3. back\nEnter the formula: \n";
+        std::string str;
+        std::getline(std::cin, str);
+        if (str == "3")
+        {
+            break;
+        }
+        else
+        {
+            TruthTable table;
+            std::string result = table.buildPDNF(str);
+            if (result == "")
+            {
+                std::cout << "Can't build the PDNF"
+                          << std::endl;
+            }
+            else
+            {
+                std::cout << result << std::endl;
+            }
+        }
+    }
+}
+
 int main()
 {
 
@@ -174,7 +202,7 @@ int main()
         }
         else if (choice == "1")
         {
-            // building_mode();
+            building_mode();
         }
         else if (choice == "2")
         {

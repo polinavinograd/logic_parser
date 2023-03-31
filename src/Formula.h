@@ -59,7 +59,7 @@ public:
         return "(" + getSign() + formula->toString() + ")";
     }
     std::shared_ptr<Formula> getFormula();
-
+  
 private:
     std::shared_ptr<Formula> formula;
 };
@@ -179,6 +179,6 @@ private:
     std::vector<bool> table;
 
 public:
-    std::vector<bool> calculate(std::shared_ptr<Formula> formula);
-    std::string       buildPDNF(const std::string& inputString);
+    std::vector<bool>        calculate(std::shared_ptr<Formula> formula);
+    std::string buildPDNF(const std::string& inputString);
 };

@@ -275,18 +275,74 @@ std::vector<bool> TruthTable::calculate(std::shared_ptr<Formula> formula)
         }
         result.emplace_back(formula->calculate(correlation));
     }
+
     return result;
 }
 
 std::string TruthTable::buildPDNF(const std::string& inputString)
 {
-    Parser      parser;
-    std::string resultPDNF;
+    Parser                   parser;
+    std::shared_ptr<Formula> resultPDNF = nullptr;
+    std::set<char>           variables;
+
     if (auto formula = parser.parseFormula(inputString))
     {
+        for (int i = 0; i < inputString.size(); i++)
+        {
+            if (isalpha(inputString[i]))
+            {
+                variables.emplace(inputString[i]);
+            }
+        }
         std::vector<bool> table = calculate(formula);
+        if (variables.size() == 0)
+        {
+            table.emplace_back(table[0]);
+            variables.insert('A');
+        }
+        for (int i = 0; i < table.size(); i++)
+        {
+            if (table[i])
+            {
+                std::vector<bool> binary_num = decimalToBinary(i, variables);
+                std::shared_ptr<Formula> currentConjunction = nullptr;
+                std::set<char>::iterator it                 = variables.begin();
 
-        // построение СДНФ
+                for (int j = 0; j < binary_num.size() && it != variables.end();
+                     j++)
+                {
+                    std::shared_ptr<Formula> temp_formula =
+                        std::make_shared<AtomicFormula>(*it);
+
+                    if (!binary_num[j])
+                    {
+                        temp_formula = std::make_shared<Negation>(temp_formula);
+                    }
+
+                    if (currentConjunction)
+                    {
+                        currentConjunction = std::make_shared<Conjunction>(
+                            temp_formula, currentConjunction);
+                    }
+                    else
+                    {
+                        currentConjunction = temp_formula;
+                    }
+                    it++;
+                }
+                if (resultPDNF)
+                {
+                    resultPDNF = std::make_shared<Disjunction>(
+                        currentConjunction, resultPDNF);
+                }
+                else
+                {
+                    resultPDNF = currentConjunction;
+                }
+            }
+        }
     }
-    return resultPDNF;
+    if (!resultPDNF)
+        return "";
+    return resultPDNF->toString();
 }
