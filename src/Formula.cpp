@@ -281,9 +281,9 @@ std::vector<bool> TruthTable::calculate(std::shared_ptr<Formula> formula)
 
 std::string TruthTable::buildPDNF(const std::string& inputString)
 {
-    Parser                   parser;
-    std::string resultPDNF = "";
-    std::set<char>           variables;
+    Parser         parser;
+    std::string    resultPDNF = "";
+    std::set<char> variables;
 
     if (auto formula = parser.parseFormula(inputString))
     {
@@ -305,8 +305,8 @@ std::string TruthTable::buildPDNF(const std::string& inputString)
             if (table[i])
             {
                 std::vector<bool> binary_num = decimalToBinary(i, variables);
-                std::string currentConjunction = "";
-                std::set<char>::iterator it                 = variables.begin();
+                std::string       currentConjunction = "";
+                std::set<char>::iterator it          = variables.begin();
 
                 for (int j = 0; j < binary_num.size() && it != variables.end();
                      j++)
@@ -321,7 +321,8 @@ std::string TruthTable::buildPDNF(const std::string& inputString)
 
                     if (!currentConjunction.empty())
                     {
-                        currentConjunction = "(" + temp_formula->toString() + "/\\" + currentConjunction + ")";
+                        currentConjunction = "(" + temp_formula->toString() +
+                                             "/\\" + currentConjunction + ")";
                     }
                     else
                     {
@@ -331,7 +332,8 @@ std::string TruthTable::buildPDNF(const std::string& inputString)
                 }
                 if (!resultPDNF.empty())
                 {
-                    resultPDNF = "(" + currentConjunction + "\\/" + resultPDNF + ")";
+                    resultPDNF =
+                        "(" + currentConjunction + "\\/" + resultPDNF + ")";
                 }
                 else
                 {
@@ -339,6 +341,10 @@ std::string TruthTable::buildPDNF(const std::string& inputString)
                 }
             }
         }
+    }
+    else
+    {
+        return "Not a formula!";
     }
     return resultPDNF;
 }

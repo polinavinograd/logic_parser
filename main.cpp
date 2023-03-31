@@ -159,6 +159,7 @@ void building_mode() {
     while (true)
     {
         std::cout << "-----------------------------------\n";
+        std::cout << "After 16 variables it takes more than 5 minutes to build PDNF\n";
         std::cout << "3. back\nEnter the formula: \n";
         std::string str;
         std::getline(std::cin, str);
