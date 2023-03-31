@@ -47,4 +47,5 @@
 *.recipe
 build
 test.txt
+.cache
 
