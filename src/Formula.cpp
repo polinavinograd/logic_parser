@@ -282,7 +282,7 @@ std::vector<bool> TruthTable::calculate(std::shared_ptr<Formula> formula)
 std::string TruthTable::buildPDNF(const std::string& inputString)
 {
     Parser                   parser;
-    std::shared_ptr<Formula> resultPDNF = nullptr;
+    std::string resultPDNF = "";
     std::set<char>           variables;
 
     if (auto formula = parser.parseFormula(inputString))
@@ -305,7 +305,7 @@ std::string TruthTable::buildPDNF(const std::string& inputString)
             if (table[i])
             {
                 std::vector<bool> binary_num = decimalToBinary(i, variables);
-                std::shared_ptr<Formula> currentConjunction = nullptr;
+                std::string currentConjunction = "";
                 std::set<char>::iterator it                 = variables.begin();
 
                 for (int j = 0; j < binary_num.size() && it != variables.end();
@@ -319,21 +319,19 @@ std::string TruthTable::buildPDNF(const std::string& inputString)
                         temp_formula = std::make_shared<Negation>(temp_formula);
                     }
 
-                    if (currentConjunction)
+                    if (!currentConjunction.empty())
                     {
-                        currentConjunction = std::make_shared<Conjunction>(
-                            temp_formula, currentConjunction);
+                        currentConjunction = "(" + temp_formula->toString() + "/\\" + currentConjunction + ")";
                     }
                     else
                     {
-                        currentConjunction = temp_formula;
+                        currentConjunction = temp_formula->toString();
                     }
                     it++;
                 }
-                if (resultPDNF)
+                if (!resultPDNF.empty())
                 {
-                    resultPDNF = std::make_shared<Disjunction>(
-                        currentConjunction, resultPDNF);
+                    resultPDNF = "(" + currentConjunction + "\\/" + resultPDNF + ")";
                 }
                 else
                 {
@@ -342,7 +340,5 @@ std::string TruthTable::buildPDNF(const std::string& inputString)
             }
         }
     }
-    if (!resultPDNF)
-        return "";
-    return resultPDNF->toString();
+    return resultPDNF;
 }
