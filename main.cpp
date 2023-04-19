@@ -1,14 +1,17 @@
 //////////////////////////////////////////////////////////////////////////////////////
-// Лабораторная работа 1 по дисциплине ЛОИС
+// Лабораторная работа 2 по дисциплине ЛОИС
 // Выполнена студентом группы 021702
 // БГУИР Виноградовой П.С.
-// Вариант 2 - Проверить, является ли строка формулой сокращенного языка логики
-// высказываний 26.02.2023
+// Вариант 9 - Построить СДНФ для заданной формулы сокращенного языка логики
+// высказываний. 27.03.2023
 
 #include "src/Formula.h"
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <math.h>
+#include <ostream>
+#include <set>
 #include <string>
 
 void testing_mode()
@@ -151,15 +154,22 @@ void calculating_mode()
                     std::cout << std::endl;
                 }
             }
+            else
+            {
+                std::cout << "Not a formula\n";
+            }
         }
     }
 }
 
-void building_mode() {
+void building_mode()
+{
     while (true)
     {
+
         std::cout << "-----------------------------------\n";
-        std::cout << "After 16 variables it takes more than 5 minutes to build PDNF\n";
+        std::cout << "After 17 variables it takes more than 5 minutes to build "
+                     "PDNF\n";
         std::cout << "3. back\nEnter the formula: \n";
         std::string str;
         std::getline(std::cin, str);
@@ -169,16 +179,32 @@ void building_mode() {
         }
         else
         {
-            TruthTable table;
+            TruthTable  table;
             std::string result = table.buildPDNF(str);
             if (result == "")
             {
-                std::cout << "Can't build the PDNF"
-                          << std::endl;
+                std::cout << "Can't build the PDNF" << std::endl;
             }
             else
             {
+                std::ofstream file_o("../pdnf_1.txt", std::ios::out);
+                if (file_o.is_open())
+                {
+                    file_o << result;
+                }
+                file_o.close();
+                std::set<char> variables;
+                for (int i = 0; i < str.size(); i++)
+                {
+                    if (isalpha(str[i]))
+                    {
+                        variables.emplace(str[i]);
+                    }
+                }
                 std::cout << result << std::endl;
+                int letters = (pow(2, variables.size()) - 1) * variables.size();
+                float ratio = float(result.size() - letters) / float(letters);
+                std::cout << ratio << std::endl;
             }
         }
     }
